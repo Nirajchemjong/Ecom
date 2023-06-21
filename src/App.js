@@ -1,23 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
+import { Button } from "react-bootstrap";
+import "./App.css";
+import { FaBeer } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+    <div className='App'>
+      <header className='App-header'>
+        <h3>
+          Lets go for a <FaBeer />?
+          <Button className='btn-success'>hello world</Button>
+        </h3>
       </header>
+      {toast.success("checking")}
+      <ToastContainer />
     </div>
   );
 }
