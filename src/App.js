@@ -1,19 +1,19 @@
-import { Button } from "react-bootstrap";
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import { FaBeer } from "react-icons/fa";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Register from "./pages/registration/Register";
 
 function App() {
   return (
     <div className='App'>
-      <header className='App-header'>
-        <h3>
-          Lets go for a <FaBeer />?
-          <Button className='btn-success'>hello world</Button>
-        </h3>
-      </header>
-      {toast.success("checking")}
+      <Routes>
+        <Route
+          path='/'
+          element={<Register />}
+        ></Route>
+      </Routes>
+      {/* {toast.success("checking")} */}
       <ToastContainer />
     </div>
   );
