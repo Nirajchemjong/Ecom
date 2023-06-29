@@ -1,8 +1,16 @@
-import { collection, doc, getDocs, query, setDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+} from "firebase/firestore";
 import { toast } from "react-toastify";
 import { db } from "../../config/firebase-config";
 import { TBL_CATEGOR } from "../../utils/Constant";
 import { setCatList } from "./CatSlice";
+import { setmodalShow } from "../system-state/SystemSlice";
 
 export const addCategoryAction =
   ({ slug, ...rest }) =>
@@ -36,7 +44,23 @@ export const fetchAllCategories = () => async (dispatch) => {
       catList.push({ ...data, slug });
     });
     dispatch(setCatList(catList));
-    console.log(catList);
+    // console.log(catList);
+  } catch (error) {
+    toast.error(error.message);
+  }
+};
+
+export const deleteCat = (slug) => (dispatch) => {
+  console.log(slug);
+  try {
+    const pending = deleteDoc(doc(db, TBL_CATEGOR, slug));
+    toast.promise(pending, {
+      pending: "Please wait...",
+      success: " Category has been deleted",
+      error: "unable to delete ",
+    });
+    dispatch(setmodalShow(false));
+    dispatch(fetchAllCategories());
   } catch (error) {
     toast.error(error.message);
   }
