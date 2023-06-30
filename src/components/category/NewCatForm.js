@@ -21,7 +21,7 @@ export const NewCatForm = () => {
       value = checked ? "active" : "inactive";
     }
     setFrom({ ...form, [name]: value });
-    console.log(form);
+    // console.log(form);
   };
   //   console.log(form);
   //   const inputFields = [

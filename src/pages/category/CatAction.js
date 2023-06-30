@@ -51,7 +51,7 @@ export const fetchAllCategories = () => async (dispatch) => {
 };
 
 export const deleteCat = (slug) => (dispatch) => {
-  console.log(slug);
+  // console.log(slug);
   try {
     const pending = deleteDoc(doc(db, TBL_CATEGOR, slug));
     toast.promise(pending, {
