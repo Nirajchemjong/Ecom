@@ -19,7 +19,7 @@ import { getUserAction } from "./pages/registration-login/UserAction";
 import { useDispatch } from "react-redux";
 import { PrivateRoute } from "./components/privateRoute/PrivateRoute";
 import { AddProduct } from "./components/product/AddProduct";
-import { EditProduct } from "./components/product/EditProduct";
+import EditProduct from "./pages/products/EditProduct";
 
 function App() {
   const dispatch = useDispatch();

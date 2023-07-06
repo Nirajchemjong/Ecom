@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Table } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import { setSelectedProduct } from "../../pages/products/ProductSlice";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const ProductTable = () => {
@@ -11,7 +10,6 @@ const ProductTable = () => {
 
   //   console.log({ ...ProductList });
 
-  const dispatch = useDispatch();
   useEffect(() => {
     setDisplay(ProductList);
   }, [ProductList]);
@@ -22,10 +20,10 @@ const ProductTable = () => {
     );
     setDisplay(filteredProduct);
   };
-  const handleOnClick = (item) => {
-    dispatch(setSelectedProduct(item));
-    // navigate("/Edit-Product");
-  };
+  //   const handleOnClick = (item) => {
+  //     dispatch(setSelectedProduct(item));
+  //     navigate("/Edit-Product");
+  //   };
   return (
     <div>
       <Form.Group className='mb-3'>
@@ -92,7 +90,7 @@ const ProductTable = () => {
                 <Link to={`/Edit-Product/${item.slug}`}>
                   <Button
                     variant='warning'
-                    onClick={() => handleOnClick(item)}
+                    // onClick={() => handleOnClick(item)}
                   >
                     Edit
                   </Button>
