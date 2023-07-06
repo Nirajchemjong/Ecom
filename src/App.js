@@ -78,7 +78,7 @@ function App() {
         />
         {/* edit product  */}
         <Route
-          path='/Edit-Product'
+          path='/Edit-Product/:id'
           element={
             <PrivateRoute>
               <EditProduct />

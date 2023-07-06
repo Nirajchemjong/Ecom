@@ -6,19 +6,32 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   addProductAction,
   deleteProduct,
+  fetchSingleProduct,
 } from "../../pages/products/ProductAction";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export const EditProduct = () => {
   const [display, setDisplay] = useState({});
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { id } = useParams();
   const { SelectedProduct } = useSelector(
     (state) => state.SelectedProductState
   );
+  const { catList } = useSelector((state) => state.categories);
   useEffect(() => {
-    setDisplay(SelectedProduct);
-  }, [SelectedProduct]);
+    dispatch(fetchSingleProduct(id));
+    if (display.slug !== SelectedProduct.slug) {
+      setDisplay(SelectedProduct);
+    }
+  }, [
+    dispatch,
+    display.slug,
+    SelectedProduct.slug,
+    setDisplay,
+    SelectedProduct,
+    id,
+  ]);
 
   //   console.log(display);
   const handleOnChange = (e) => {
@@ -59,7 +72,7 @@ export const EditProduct = () => {
       type: "text",
       placeholder: "Sku",
       value: display.sku,
-      required: true,
+      disable: true,
     },
     {
       label: "Price",
@@ -129,15 +142,22 @@ export const EditProduct = () => {
               label='Select Categories'
               className='mb-3'
               name='selectedCategory'
-              value={display.selectedCategory}
             >
               <Form.Select
                 aria-label='Select Product Categories'
                 onChange={handleOnChange}
                 name='selectedCategory'
-                value={display.selectedCategory}
               >
-                <option>Select Product Categories</option>
+                <option value=' '>---Select---</option>
+                {catList.map(({ name, slug }, i) => (
+                  <option
+                    key={i}
+                    value={slug}
+                    selected={slug === display.selectedCategory}
+                  >
+                    {name}
+                  </option>
+                ))}
                 <option value='1'>One</option>
                 <option value='2'>Two</option>
                 <option value='3'>Three</option>
@@ -159,6 +179,7 @@ export const EditProduct = () => {
                 value={display.description}
               />
             </FloatingLabel>
+
             <Col md='8'>
               <Button
                 variant='warning'

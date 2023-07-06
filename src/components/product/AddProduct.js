@@ -7,6 +7,9 @@ import { addProductAction } from "../../pages/products/ProductAction";
 import slugify from "slugify";
 import { useNavigate } from "react-router-dom";
 import { fetchAllCategories } from "../../pages/category/CatAction";
+import { toast } from "react-toastify";
+import { storage } from "../../config/firebase-config";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 export const AddProduct = () => {
   const [product, setProduct] = useState({
@@ -15,6 +18,7 @@ export const AddProduct = () => {
   const [cat, setCategory] = useState([]);
   const [progress, setProgress] = useState(0);
   const { catList } = useSelector((state) => state.categories);
+  const [img, setImg] = useState();
 
   //   console.log(cat);
   const dispatch = useDispatch();
@@ -24,6 +28,11 @@ export const AddProduct = () => {
     !cat.length && dispatch(fetchAllCategories()) && setCategory(catList);
   }, [catList, dispatch, cat]);
   //   console.log(cat);
+
+  const handleOnImgAttached = (e) => {
+    const { files } = e.target;
+    setImg([...files]);
+  };
   const handleOnChange = (e) => {
     let { checked, value, name } = e.target;
     if (name === "status") {
@@ -33,15 +42,65 @@ export const AddProduct = () => {
       ...product,
       [name]: value,
     });
-    setProgress(...progress);
   };
 
-  const handleOnSubmit = (e) => {
+  const handleOnSubmit = async (e) => {
     e.preventDefault();
-    const slug = slugify(product.title, { lower: true, trim: true });
+
     // console.log({ slug, ...product });
-    dispatch(addProductAction({ ...product, slug }));
-    navigate("/products");
+
+    try {
+      const slug = slugify(product.title, { lower: true, trim: true });
+      if (img.length) {
+        const imgResp = img.map((img) => {
+          return new Promise((resolve, reject) => {
+            const storeRef = ref(
+              storage,
+              `products/img/${Date.now()}-${img.name}`
+            );
+
+            const uploadImg = uploadBytesResumable(storeRef, img);
+
+            uploadImg.on(
+              //state changed
+              "state_changed",
+              //progress while changed
+
+              (snapshot) => {
+                const per = Math.round(
+                  (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                );
+                setProgress(per); //this is for progress bar
+              },
+
+              (error) => {
+                //to check the error
+                toast.error(error.message);
+              },
+              // once uploading process is completed, get the url of the upload image
+              async () => {
+                await getDownloadURL(uploadImg.snapshot.ref).then((url) => {
+                  resolve(url);
+                });
+              }
+            );
+          });
+        });
+        const imgUrls = await Promise.all(imgResp);
+        dispatch(
+          addProductAction({
+            ...product,
+            slug,
+            images: imgUrls,
+            thumbnail: imgUrls[0],
+          })
+        );
+      }
+
+      navigate("/products");
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
   const inputFields = [
     {
@@ -158,7 +217,7 @@ export const AddProduct = () => {
               <Form.Control
                 name='images'
                 type='file'
-                onChange={handleOnChange}
+                onChange={handleOnImgAttached}
                 multiple
               ></Form.Control>
             </Form.Group>

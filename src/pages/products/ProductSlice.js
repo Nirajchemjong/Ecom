@@ -12,7 +12,9 @@ const productSlice = createSlice({
       state.ProductList = payload;
     },
     setSelectedProduct: (state, { payload }) => {
-      state.SelectedProduct = payload;
+      if (state.SelectedProduct.slug !== payload.slug) {
+        state.SelectedProduct = payload;
+      }
     },
   },
 });

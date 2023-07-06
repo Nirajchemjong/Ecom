@@ -60,3 +60,21 @@ export const deleteProduct = (slug) => (dispatch) => {
     console.log(error.message);
   }
 };
+
+export const fetchSingleProduct = (id) => async (dispatch) => {
+  try {
+    //   const q = query(collection(db, TBL_PRODUCT));
+    const productSnap = await getDocs(doc(db, TBL_PRODUCT));
+    const productList = [];
+
+    productSnap.forEach((item) => {
+      const slug = item.id;
+      const data = item.data();
+      productList.push({ ...data, slug });
+    });
+    dispatch(setProductList(productList));
+  } catch (error) {
+    console.log(error.message);
+    toast.error(error.message);
+  }
+};

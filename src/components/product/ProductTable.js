@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Form, Table } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedProduct } from "../../pages/products/ProductSlice";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const ProductTable = () => {
   const [display, setDisplay] = useState([]);
@@ -10,7 +10,7 @@ const ProductTable = () => {
   const { ProductList } = useSelector((state) => state.productState);
 
   //   console.log({ ...ProductList });
-  const navigate = useNavigate();
+
   const dispatch = useDispatch();
   useEffect(() => {
     setDisplay(ProductList);
@@ -24,7 +24,7 @@ const ProductTable = () => {
   };
   const handleOnClick = (item) => {
     dispatch(setSelectedProduct(item));
-    navigate("/Edit-Product");
+    // navigate("/Edit-Product");
   };
   return (
     <div>
@@ -54,6 +54,7 @@ const ProductTable = () => {
             <th>#</th>
             <th>status</th>
             <th>Product Name</th>
+            <th>Product Img</th>
             <th>Slug</th>
             <th>SKU</th>
             <th>Price</th>
@@ -72,6 +73,13 @@ const ProductTable = () => {
                 <span className={item.status}>{item.status}</span>
               </td>
               <td>{item.title}</td>
+              <td>
+                <img
+                  src={item.thumbnail}
+                  alt='images'
+                  width={150}
+                />
+              </td>
               <td>{item.slug}</td>
               <td>{item.sku}</td>
               <td>{item.Price}</td>
@@ -81,12 +89,14 @@ const ProductTable = () => {
               <td>{item.selectedCategory}</td>
               <td>{item.description}</td>
               <td>
-                <Button
-                  variant='warning'
-                  onClick={() => handleOnClick(item)}
-                >
-                  Edit
-                </Button>
+                <Link to={`/Edit-Product/${item.slug}`}>
+                  <Button
+                    variant='warning'
+                    onClick={() => handleOnClick(item)}
+                  >
+                    Edit
+                  </Button>
+                </Link>
               </td>
             </tr>
           ))}
