@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Table } from "react-bootstrap";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { fetchAllCategories } from "../../pages/category/CatAction";
 
 const ProductTable = () => {
   const [display, setDisplay] = useState([]);
 
   const { ProductList } = useSelector((state) => state.productState);
 
+  const dispatch = useDispatch();
   //   console.log({ ...ProductList });
 
   useEffect(() => {
     setDisplay(ProductList);
-  }, [ProductList]);
+    dispatch(fetchAllCategories);
+  }, [ProductList, dispatch]);
   const handleOnSearch = (e) => {
     const { value } = e.target;
     const filteredProduct = ProductList.filter(({ title, slug }) =>

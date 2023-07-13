@@ -4,24 +4,26 @@ import { CustomInput } from "../custom-input/CustomInput";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addProductAction,
+  deleteProduct,
   fetchSingleProduct,
 } from "../../pages/products/ProductAction";
 import slugify from "slugify";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchAllCategories } from "../../pages/category/CatAction";
 import { toast } from "react-toastify";
 import { storage } from "../../config/firebase-config";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { fetchAllCategories } from "../../pages/category/CatAction";
 
 export const EditProductForm = () => {
   const [product, setProduct] = useState({});
   const [progress, setProgress] = useState(0);
+  // const [thumbnail, setThumbnail] = useState();
+  const [imgdelete, setImgDelete] = useState([]);
   const { catList } = useSelector((state) => state.categories);
 
   const { SelectedProduct } = useSelector(
     (state) => state.SelectedProductState
   );
-
   const [img, setImg] = useState();
 
   const dispatch = useDispatch();
@@ -32,7 +34,7 @@ export const EditProductForm = () => {
   useEffect(() => {
     !product.slug && dispatch(fetchSingleProduct(id));
     dispatch(fetchAllCategories());
-    setProduct(SelectedProduct);
+    SelectedProduct.slug !== product.slug && setProduct(SelectedProduct);
   }, [dispatch, id, SelectedProduct, product]);
   //   console.log(cat);
 
@@ -40,8 +42,17 @@ export const EditProductForm = () => {
     const { files } = e.target;
     setImg([...files]);
   };
+  // console.log(imgdelete);
   const handleOnChange = (e) => {
     let { checked, value, name } = e.target;
+    console.log(name, value);
+
+    if (name === "thumbnail") {
+      if (imgdelete.includes(value)) {
+        return alert("You cann't select delete");
+      }
+    }
+
     if (name === "status") {
       value = checked ? "active" : "inactive";
     }
@@ -50,15 +61,48 @@ export const EditProductForm = () => {
       [name]: value,
     });
   };
+  // console.log(product?.thumbnail);
 
+  // const imgs = product.images; //this imgs is the selected images arrays
+
+  const handleOnImgDelete = (e) => {
+    const { checked, value } = e.target;
+
+    // console.log(checked, name, value);
+    if (checked) {
+      // console.log(product.thumbnail);
+      if (product.thumbnail === value) {
+        return alert("You cannot delete selected thumbnail");
+      }
+      setImgDelete([...imgdelete, value]);
+    } else {
+      const filteredImgs = imgdelete.filter((img) => img !== value);
+      // console.log(filteredImgs);
+      setImgDelete(filteredImgs);
+    }
+  };
+  // console.log(imgdelete);
+  // console.log(filteredImgs);
+
+  // console.log(product);
+  const handleOnDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      //proceed to delete this product
+      const result = await dispatch(deleteProduct(id));
+      result && navigate("/products");
+    }
+  };
   const handleOnSubmit = async (e) => {
     e.preventDefault();
 
     // console.log({ slug, ...product });
 
     try {
-      const slug = slugify(product.title, { lower: true, trim: true });
-      if (img.length) {
+      const slug = product.slug;
+      let oldImgToKeep = [];
+      // console.log(img);
+      if (img?.length) {
+        //loop through images
         const imgResp = img.map((img) => {
           return new Promise((resolve, reject) => {
             const storeRef = ref(
@@ -94,12 +138,23 @@ export const EditProductForm = () => {
           });
         });
         const imgUrls = await Promise.all(imgResp);
+
+        //remove  images url
+        oldImgToKeep = product.images.filter((img) => !img.includes(img));
+        console.log(oldImgToKeep);
         dispatch(
           addProductAction({
             ...product,
             slug,
-            images: imgUrls,
-            thumbnail: imgUrls[0],
+            images: [...oldImgToKeep, ...imgUrls],
+          })
+        );
+      } else {
+        dispatch(
+          addProductAction({
+            ...product,
+            slug,
+            images: [],
           })
         );
       }
@@ -108,6 +163,7 @@ export const EditProductForm = () => {
     } catch (error) {
       toast.error(error.message);
     }
+    // console.log(filteredImgs);
   };
   const inputFields = [
     {
@@ -159,6 +215,11 @@ export const EditProductForm = () => {
     },
   ];
 
+  ///for thumbnail and delete
+
+  // console.log("delete" + imgdelete, "thumbnail" + thumbnail);
+  // if()
+  // console.log(imgdelete);
   return (
     <div>
       <Form
@@ -222,6 +283,42 @@ export const EditProductForm = () => {
             />
           </FloatingLabel>
 
+          <div className='d-flex gap-2 '>
+            {product?.images &&
+              product.images.map((item, id) => (
+                <div
+                  className='flex-column gap-3'
+                  key={id}
+                >
+                  <div className='d-flex gap-5'>
+                    <Form.Check
+                      name='thumbnail'
+                      type='radio'
+                      label='Thumbnail'
+                      value={item}
+                      checked={product.thumbnail === item}
+                      onChange={handleOnChange}
+                    />
+                  </div>
+                  <img
+                    key={id}
+                    src={item}
+                    alt='images'
+                    style={{ width: "150px" }}
+                  ></img>
+                  <div className='flex-column'>
+                    <Form.Check
+                      name='delete'
+                      type='checkbox'
+                      label='Delete'
+                      value={item}
+                      checked={imgdelete.includes(item)}
+                      onChange={handleOnImgDelete}
+                    ></Form.Check>
+                  </div>
+                </div>
+              ))}
+          </div>
           <Form.Group className='mb-3'>
             <Form.Control
               name='images'
@@ -236,11 +333,18 @@ export const EditProductForm = () => {
             className='mb-3'
           />
           <Button
-            variant='primary'
+            variant='danger'
+            className='text-center mb-2'
+            onClick={handleOnDelete}
+          >
+            Delete
+          </Button>
+          <Button
+            variant='success'
             type='submit'
             className='text-center'
           >
-            Add New Product
+            Update
           </Button>
         </Row>
 

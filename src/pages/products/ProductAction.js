@@ -47,6 +47,20 @@ export const fetchAllProducts = () => async (dispatch) => {
     toast.error(error.message);
   }
 };
+
+export const fetchSingleProduct = (id) => async (dispatch) => {
+  try {
+    // console.log(id);
+    //   const q = query(collection(db, TBL_PRODUCT));
+    const productSnap = await getDoc(doc(db, TBL_PRODUCT, id));
+    const data = productSnap.data();
+    dispatch(setSelectedProduct({ ...data, slug: id }));
+  } catch (error) {
+    console.log(error.message);
+    toast.error(error.message);
+  }
+};
+
 export const deleteProduct = (slug) => (dispatch) => {
   try {
     const res = deleteDoc(doc(db, TBL_PRODUCT, slug));
@@ -56,21 +70,9 @@ export const deleteProduct = (slug) => (dispatch) => {
       error: "Unable to delete, Please try again",
     });
     dispatch(fetchAllProducts());
+    return true;
   } catch (error) {
     toast.error(error.message);
     console.log(error.message);
-  }
-};
-
-export const fetchSingleProduct = (id) => async (dispatch) => {
-  try {
-    console.log(id);
-    //   const q = query(collection(db, TBL_PRODUCT));
-    const productSnap = await getDoc(doc(db, TBL_PRODUCT, id));
-    const data = productSnap.data();
-    dispatch(setSelectedProduct({ ...data, slug: id }));
-  } catch (error) {
-    console.log(error.message);
-    toast.error(error.message);
   }
 };
