@@ -7,7 +7,6 @@ import {
   deleteProduct,
   fetchSingleProduct,
 } from "../../pages/products/ProductAction";
-import slugify from "slugify";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { storage } from "../../config/firebase-config";
@@ -96,10 +95,9 @@ export const EditProductForm = () => {
     e.preventDefault();
 
     // console.log({ slug, ...product });
-
     try {
-      const slug = product.slug;
       let oldImgToKeep = [];
+      let imgUrls = [];
       // console.log(img);
       if (img?.length) {
         //loop through images
@@ -137,27 +135,29 @@ export const EditProductForm = () => {
             );
           });
         });
-        const imgUrls = await Promise.all(imgResp);
-
-        //remove  images url
-        oldImgToKeep = product.images.filter((img) => !img.includes(img));
-        console.log(oldImgToKeep);
-        dispatch(
-          addProductAction({
-            ...product,
-            slug,
-            images: [...oldImgToKeep, ...imgUrls],
-          })
-        );
-      } else {
-        dispatch(
-          addProductAction({
-            ...product,
-            slug,
-            images: [],
-          })
-        );
+        imgUrls = await Promise.all(imgResp);
       }
+      if (product.images) {
+        //remove  images url
+        oldImgToKeep = product.images.filter((img) => !imgdelete.includes(img));
+
+        // add the url from product
+        const obj = {
+          ...product,
+          images: [...oldImgToKeep, ...imgUrls],
+        };
+        dispatch(addProductAction(obj));
+        setImgDelete([]);
+      }
+      // else {
+      //   dispatch(
+      //     addProductAction({
+      //       ...product,
+      //       slug,
+      //       images: [...imgUrls],
+      //     })
+      //   );
+      // }
 
       navigate("/products");
     } catch (error) {
@@ -285,7 +285,7 @@ export const EditProductForm = () => {
 
           <div className='d-flex gap-2 '>
             {product?.images &&
-              product.images.map((item, id) => (
+              product?.images.map((item, id) => (
                 <div
                   className='flex-column gap-3'
                   key={id}

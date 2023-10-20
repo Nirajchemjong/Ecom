@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   catList: [],
 };
-const userSlice = createSlice({
+const catSlice = createSlice({
   name: "category",
   initialState,
   reducers: {
@@ -13,6 +13,6 @@ const userSlice = createSlice({
   },
 });
 
-const { reducer, actions } = userSlice;
+const { reducer, actions } = catSlice;
 export const { setCatList } = actions;
 export default reducer;
